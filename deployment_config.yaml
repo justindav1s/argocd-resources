@@ -1,0 +1,80 @@
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+  annotations:
+    openshift.io/generated-by: OpenShiftNewApp
+  name: inventory
+  labels:
+    app: inventory
+spec:
+  strategy:
+    type: Rolling
+    rollingParams:
+      updatePeriodSeconds: 1
+      intervalSeconds: 1
+      timeoutSeconds: 600
+      maxUnavailable: 25%
+      maxSurge: 25%
+    resources: {}
+    activeDeadlineSeconds: 21600
+  triggers: []
+  replicas: 1
+  revisionHistoryLimit: 10
+  test: false
+  selector:
+    app: inventory
+    deploymentconfig: inventory
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: inventory
+        deploymentconfig: inventory
+      annotations:
+        openshift.io/generated-by: OpenShiftNewApp
+    spec:
+      restartPolicy: Always
+      serviceAccountName: inventory-sa
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      securityContext: {}
+      containers:
+        - resources: {}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          terminationMessagePath: /dev/termination-log
+          name: inventory
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: dev
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: inventory-config-vol
+              mountPath: /config
+          terminationMessagePolicy: File
+          image: quay.io/justindav1s/inventory:2
+      serviceAccount: inventory-sa
+      volumes:
+        - name: inventory-config-vol
+          configMap:
+            name: inventory-config
+            defaultMode: 420
+      dnsPolicy: ClusterFirst
