@@ -7,3 +7,4 @@ data:
     my.property=hello
     sleep.time.ms=0
     inventory.version=dev
+    config_added_via_git=true
