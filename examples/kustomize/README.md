@@ -1,0 +1,1 @@
+## Using kustomize to generate config for ArgoCD

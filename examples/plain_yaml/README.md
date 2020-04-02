@@ -1,0 +1,1 @@
+## Plain yaml designed to be on operated on directly.
